@@ -142,9 +142,11 @@ console.log(`Got ${items.length} suppliers`);
 - City/state filters use exact matching against the parsed location text.
 - TradeIndia page structure may change over time. If a run returns no results, try broader keywords, reduce filters, or enable Apify Proxy.
 
-## Legal and Ethical Use
+## Responsible Use
 
-Use this actor for legitimate research, lead generation, and analysis. You are responsible for complying with TradeIndia's terms, privacy laws, GDPR, CAN-SPAM, and local regulations wherever you use the data.
+This Actor is intended for lawful collection of publicly available information only. Users are responsible for ensuring their use complies with the source website's terms, robots.txt, applicable privacy laws, including India's DPDP Act, and all local regulations.
+
+Do not use this Actor to collect, store, sell, or misuse personal data without a lawful basis. The Actor author is not responsible for misuse by end users.
 
 ## License
 

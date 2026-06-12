@@ -11,7 +11,7 @@
   "storages": {
     "dataset": "./dataset_schema.json"
   },
-  "categories": ["LEAD_GENERATION", "ECOMMERCE", "OTHER"],
+  "categories": ["ECOMMERCE", "OTHER"],
   "memoryMbytes": 4096,
   "timeoutSecs": 43200,
   "defaultRunOptions": {
