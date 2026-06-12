@@ -1,0 +1,7 @@
+{
+  "keywords": ["packaging machine"],
+  "maxResults": 10,
+  "proxyConfiguration": {
+    "useApifyProxy": false
+  }
+}

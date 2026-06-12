@@ -1,0 +1,37 @@
+{
+  "actorSpecification": 1,
+  "name": "tradeindia-b2b-supplier-scraper",
+  "title": "TradeIndia B2B Supplier Scraper",
+  "description": "Scrape TradeIndia supplier and product listings with company names, business type, location, price, MOQ, trust flags, website, product URL, and supplier URL. No login or API key required.",
+  "version": "1.0",
+  "buildTag": "latest",
+  "dockerfile": "./Dockerfile",
+  "readme": "../README.md",
+  "input": "../INPUT_SCHEMA.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "categories": ["LEAD_GENERATION", "ECOMMERCE", "OTHER"],
+  "memoryMbytes": 4096,
+  "timeoutSecs": 43200,
+  "defaultRunOptions": {
+    "memoryMbytes": 4096,
+    "timeoutSecs": 43200
+  },
+  "exampleRunInput": {
+    "contentType": "application/json; charset=utf-8",
+    "body": "{\n  \"keywords\": [\"packaging machine\"],\n  \"maxResults\": 10,\n  \"proxyConfiguration\": {\n    \"useApifyProxy\": false\n  }\n}"
+  },
+  "pricingInfo": {
+    "pricingModel": "PAY_PER_EVENT",
+    "pricingPerEvent": {
+      "actorChargeEvents": {
+        "supplier-scraped": {
+          "eventTitle": "Supplier scraped",
+          "eventDescription": "Charged once for each clean TradeIndia supplier/product record saved to the dataset.",
+          "eventPriceUsd": 0.003
+        }
+      }
+    }
+  }
+}

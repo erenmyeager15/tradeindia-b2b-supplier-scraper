@@ -1,0 +1,92 @@
+{
+  "actorSpecification": 1,
+  "views": {
+    "suppliers": {
+      "title": "Suppliers",
+      "transformation": {
+        "fields": [
+          "imageUrl",
+          "searchQuery",
+          "productName",
+          "supplierName",
+          "businessType",
+          "city",
+          "state",
+          "priceDisplay",
+          "minimumOrderQuantity",
+          "inStock",
+          "trustedSeller",
+          "premiumSeller",
+          "supplierWebsite",
+          "productUrl",
+          "scrapedAt"
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "imageUrl": {
+            "label": "Image",
+            "format": "image"
+          },
+          "searchQuery": {
+            "label": "Search",
+            "format": "text"
+          },
+          "productName": {
+            "label": "Product",
+            "format": "text"
+          },
+          "supplierName": {
+            "label": "Supplier",
+            "format": "text"
+          },
+          "businessType": {
+            "label": "Business Type",
+            "format": "text"
+          },
+          "city": {
+            "label": "City",
+            "format": "text"
+          },
+          "state": {
+            "label": "State",
+            "format": "text"
+          },
+          "priceDisplay": {
+            "label": "Price",
+            "format": "text"
+          },
+          "minimumOrderQuantity": {
+            "label": "MOQ",
+            "format": "text"
+          },
+          "inStock": {
+            "label": "In Stock",
+            "format": "boolean"
+          },
+          "trustedSeller": {
+            "label": "Trusted",
+            "format": "boolean"
+          },
+          "premiumSeller": {
+            "label": "Premium",
+            "format": "boolean"
+          },
+          "supplierWebsite": {
+            "label": "Website",
+            "format": "link"
+          },
+          "productUrl": {
+            "label": "Product URL",
+            "format": "link"
+          },
+          "scrapedAt": {
+            "label": "Scraped At",
+            "format": "date"
+          }
+        }
+      }
+    }
+  }
+}

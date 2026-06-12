@@ -1,0 +1,72 @@
+{
+  "title": "TradeIndia B2B Supplier Scraper Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "keywords": {
+      "title": "Keywords",
+      "type": "array",
+      "description": "Product or service keywords to search on TradeIndia.",
+      "editor": "stringList",
+      "items": {
+        "type": "string"
+      },
+      "default": ["packaging machine"]
+    },
+    "city": {
+      "title": "City filter",
+      "type": "string",
+      "description": "Optional exact city filter applied to parsed supplier records.",
+      "editor": "textfield"
+    },
+    "state": {
+      "title": "State filter",
+      "type": "string",
+      "description": "Optional exact state filter applied to parsed supplier records.",
+      "editor": "textfield"
+    },
+    "businessTypes": {
+      "title": "Business type filters",
+      "type": "array",
+      "description": "Optional filters such as Manufacturer, Supplier, Exporter, Distributor, Trader, or Service Provider.",
+      "editor": "stringList",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "trustedOnly": {
+      "title": "Trusted sellers only",
+      "type": "boolean",
+      "description": "Keep only records marked as trusted by TradeIndia.",
+      "editor": "checkbox",
+      "default": false
+    },
+    "madeInIndiaOnly": {
+      "title": "Made in India only",
+      "type": "boolean",
+      "description": "Keep only records marked as Made in India.",
+      "editor": "checkbox",
+      "default": false
+    },
+    "maxResults": {
+      "title": "Maximum results",
+      "type": "integer",
+      "description": "Maximum number of unique supplier/product records to save.",
+      "editor": "number",
+      "minimum": 1,
+      "maximum": 500,
+      "default": 50
+    },
+    "proxyConfiguration": {
+      "title": "Proxy configuration",
+      "type": "object",
+      "description": "Optional proxy settings. Leave disabled unless TradeIndia rate limits a run.",
+      "editor": "proxy",
+      "default": {
+        "useApifyProxy": false
+      }
+    }
+  },
+  "required": ["keywords", "maxResults"]
+}
