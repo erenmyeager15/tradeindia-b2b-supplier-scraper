@@ -1,0 +1,14 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "TradeIndia B2B Supplier Scraper Output",
+  "description": "Structured TradeIndia supplier and product records with search keyword, product names, supplier names, business types, city, state, prices, MOQ, trust flags, websites, product URLs, image URLs, and scraped timestamps.",
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "string",
+      "title": "TradeIndia supplier records",
+      "description": "Clean dataset items containing public TradeIndia supplier, product, price, business type, location, trust, website, and product URL data.",
+      "template": "{{links.apiDefaultDatasetUrl}}/items"
+    }
+  }
+}

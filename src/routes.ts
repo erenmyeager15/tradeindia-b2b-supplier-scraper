@@ -3,7 +3,7 @@ import { fetch, ProxyAgent, type Dispatcher } from 'undici';
 import type { ActorInput, NormalizedInput, ScrapeJob, SupplierRecord } from './types.js';
 
 const CHARGE_EVENT_NAME = 'supplier-scraped';
-const DEFAULT_MAX_RESULTS = 50;
+const DEFAULT_MAX_RESULTS = 10;
 const MAX_RESULTS_CAP = 500;
 const RESULTS_PER_PAGE_ESTIMATE = 28;
 const BASE_URL = 'https://www.tradeindia.com';
@@ -23,7 +23,9 @@ export async function scrapeTradeIndia(rawInput: ActorInput): Promise<void> {
     const proxyConfiguration = await Actor.createProxyConfiguration(input.proxyConfiguration);
     const jobs = buildJobs(input);
     const seen = new Set<string>();
+    const exhaustedKeywords = new Set<string>();
     let pushed = 0;
+    let chargeLimitReached = false;
 
     log.info('Starting TradeIndia scrape', {
         keywords: input.keywords,
@@ -34,52 +36,76 @@ export async function scrapeTradeIndia(rawInput: ActorInput): Promise<void> {
     });
 
     for (const job of jobs) {
-        if (pushed >= input.maxResults) break;
+        if (pushed >= input.maxResults || chargeLimitReached) break;
+        if (exhaustedKeywords.has(job.keyword)) continue;
 
         log.info('Fetching TradeIndia search results', { keyword: job.keyword, page: job.page, url: job.url });
 
+        let listings: AnyObject[];
         try {
             const html = await fetchHtml(job.url, proxyConfiguration);
-            const listings = extractListings(html);
-
-            if (listings.length === 0) {
-                log.warning('No listings parsed from page', { keyword: job.keyword, page: job.page });
-            }
-
-            let pushedFromPage = 0;
-            for (const listing of listings) {
-                if (pushed >= input.maxResults) break;
-
-                const record = normalizeListing(listing, job.keyword);
-                if (!record) continue;
-                if (!passesFilters(record, input)) continue;
-
-                const dedupeKey = `${record.productId}|${record.supplierId ?? record.supplierName ?? ''}`;
-                if (seen.has(dedupeKey)) continue;
-                seen.add(dedupeKey);
-
-                await Actor.pushData(record);
-                await Actor.charge({ eventName: CHARGE_EVENT_NAME });
-                pushed += 1;
-                pushedFromPage += 1;
-            }
-
-            log.info('Parsed page complete', {
-                keyword: job.keyword,
-                page: job.page,
-                parsed: listings.length,
-                pushedFromPage,
-                totalPushed: pushed,
-            });
+            listings = extractListings(html);
         } catch (error) {
             log.warning(`Skipping page after retries: ${(error as Error).message}`, {
                 keyword: job.keyword,
                 page: job.page,
                 url: job.url,
             });
+            await delay(randomInt(900, 2200));
+            continue;
         }
 
-        await delay(randomInt(900, 2200));
+        if (listings.length === 0) {
+            exhaustedKeywords.add(job.keyword);
+            log.info('No listings parsed; stopping pagination for this keyword', {
+                keyword: job.keyword,
+                page: job.page,
+            });
+            continue;
+        }
+
+        let pushedFromPage = 0;
+        for (const listing of listings) {
+            if (pushed >= input.maxResults) break;
+
+            const record = normalizeListing(listing, job.keyword);
+            if (!record) continue;
+            if (!passesFilters(record, input)) continue;
+
+            const dedupeKey = `${record.productId}|${record.supplierId ?? record.supplierName ?? ''}`;
+            if (seen.has(dedupeKey)) continue;
+
+            // Push and charge atomically so records beyond the user's charge limit
+            // are not saved for free and billing failures stop the run immediately.
+            const chargingResult = await Actor.pushData(record, CHARGE_EVENT_NAME);
+            const recordWasSaved = chargingResult.chargedCount > 0 || !chargingResult.eventChargeLimitReached;
+            if (recordWasSaved) {
+                seen.add(dedupeKey);
+                pushed += 1;
+                pushedFromPage += 1;
+            }
+
+            if (chargingResult.eventChargeLimitReached) {
+                chargeLimitReached = true;
+                await Actor.setStatusMessage(`Stopped at the user's spending limit after ${pushed} suppliers`);
+                log.warning('Maximum charge limit reached; stopping before any further requests or results.', {
+                    totalPushed: pushed,
+                });
+                break;
+            }
+        }
+
+        log.info('Parsed page complete', {
+            keyword: job.keyword,
+            page: job.page,
+            parsed: listings.length,
+            pushedFromPage,
+            totalPushed: pushed,
+        });
+
+        if (!chargeLimitReached && pushed < input.maxResults) {
+            await delay(randomInt(900, 2200));
+        }
     }
 
     if (pushed === 0) {
@@ -90,13 +116,13 @@ export async function scrapeTradeIndia(rawInput: ActorInput): Promise<void> {
 }
 
 function normalizeInput(input: ActorInput): NormalizedInput {
-    const keywords = (input.keywords?.length ? input.keywords : ['packaging machine'])
+    const keywords = (input.keywords?.length ? input.keywords : ['led light'])
         .map((keyword) => cleanText(keyword))
         .filter(Boolean)
         .slice(0, 25);
 
     return {
-        keywords: keywords.length ? keywords : ['packaging machine'],
+        keywords: keywords.length ? keywords : ['led light'],
         city: cleanText(input.city) || null,
         state: cleanText(input.state) || null,
         businessTypes: (input.businessTypes ?? []).map((type) => cleanText(type).toLowerCase()).filter(Boolean),

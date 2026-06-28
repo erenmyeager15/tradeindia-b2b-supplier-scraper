@@ -1,17 +1,18 @@
 {
   "title": "TradeIndia B2B Supplier Scraper Input",
+  "description": "Search TradeIndia public supplier and product listings. Defaults are set for a low-cost LED light supplier test.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
     "keywords": {
       "title": "Keywords",
       "type": "array",
-      "description": "Product or service keywords to search on TradeIndia.",
+      "description": "Product or service keywords to search on TradeIndia. Start with one keyword to keep usage low.",
       "editor": "stringList",
       "items": {
         "type": "string"
       },
-      "default": ["packaging machine"]
+      "default": ["led light"]
     },
     "city": {
       "title": "City filter",
@@ -52,16 +53,16 @@
     "maxResults": {
       "title": "Maximum results",
       "type": "integer",
-      "description": "Maximum number of unique supplier/product records to save.",
+      "description": "Maximum number of unique supplier/product records to save. Start with 10 for a small test run.",
       "editor": "number",
       "minimum": 1,
       "maximum": 500,
-      "default": 50
+      "default": 10
     },
     "proxyConfiguration": {
       "title": "Proxy configuration",
       "type": "object",
-      "description": "Optional proxy settings. Leave disabled unless TradeIndia rate limits a run.",
+      "description": "Optional proxy settings. Leave disabled unless TradeIndia rate limits a run. Proxy traffic may be billed as platform usage.",
       "editor": "proxy",
       "default": {
         "useApifyProxy": false
