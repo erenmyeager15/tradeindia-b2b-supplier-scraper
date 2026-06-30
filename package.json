@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "build": "node ./node_modules/typescript/bin/tsc",
+    "test": "npm run build && node --test dist/routes.test.js",
     "start": "node dist/main.js"
   },
   "dependencies": {

@@ -1,10 +1,10 @@
-# TradeIndia B2B Supplier Scraper - Suppliers, Products, Prices & MOQ
+# TradeIndia Supplier Scraper - B2B Products, Prices & MOQ
 
 Scrape public TradeIndia supplier and product listings by keyword, with company names, business type, location, price, MOQ, trust flags, website, and product URLs. Export clean data to JSON, CSV, Excel, or HTML, or pull it via the Apify API. No login and no API key required.
 
 Built with Node.js 20, TypeScript, and the Apify SDK using native `fetch`. The Actor reads TradeIndia's embedded search data (`__NEXT_DATA__`) instead of fragile DOM scraping, with retries and resilient extraction so runs are reliable and repeatable.
 
-For a low-cost first run, use the default sample input: `led light`, 10 supplier/product records, and no proxy unless needed.
+For a low-cost first run, use the default sample input: `led light`, 1 supplier/product record, and no proxy unless needed.
 
 ## What it extracts
 
@@ -26,21 +26,22 @@ The Actor does not extract hidden phone numbers, emails, or private contact deta
 2. Vendor shortlisting for product sourcing
 3. Supplier monitoring across product categories
 4. India manufacturing and trade market research
-5. Sales prospecting and CRM enrichment workflows
+5. Company-level supplier research and CRM enrichment workflows
 
 ## Pricing and usage
 
-This Actor uses Apify Pay Per Event pricing. You pay only for clean records delivered to the dataset. Failed, blocked, or empty results are not billed as supplier records.
+This Actor uses Apify Pay Per Event pricing. The live Store configuration charges a small start event and then charges supplier/product rows only when clean records are saved to the dataset. Failed, blocked, or empty runs are not billed as supplier records.
 
-| Event name | Price per event | 1,000 results | 10,000 results |
-| --- | ---: | ---: | ---: |
-| `supplier-scraped` | $0.003 | $3.00 | $30.00 |
+| Event name | Price | When charged |
+| --- | ---: | --- |
+| `apify-actor-start` | $0.00005 per GB | When the run starts, minimum one event |
+| `supplier-scraped` | $0.003 | For each clean supplier/product record saved |
 
 Supplier/product rows are charged only when clean records are saved. Depending on the active Store pricing configuration, platform usage such as compute and proxy traffic may also be billed by Apify.
 
 Cost-control tips:
 
-- Start with one keyword and `maxResults: 10`.
+- Start with one keyword and `maxResults: 1`.
 - Leave proxy disabled unless TradeIndia rate limits or blocks the run.
 - Add location, trust, or business-type filters only after the first run confirms the output fits your use case.
 - Use the run's maximum cost setting if you want a strict spending cap.
@@ -55,7 +56,7 @@ Cost-control tips:
 | `businessTypes` | array | no | `[]` | Optional filters such as Manufacturer, Supplier, Exporter, Distributor, Trader, or Service Provider. |
 | `trustedOnly` | boolean | no | `false` | Keep only records marked trusted by TradeIndia. |
 | `madeInIndiaOnly` | boolean | no | `false` | Keep only records marked Made in India. |
-| `maxResults` | integer | yes | `10` | Maximum unique supplier/product records to save. |
+| `maxResults` | integer | yes | `1` | Maximum unique supplier/product records to save. |
 | `proxyConfiguration` | object | no | disabled | Apify proxy settings. Enable only if TradeIndia rate limits a run. |
 
 ## Example input
@@ -63,7 +64,7 @@ Cost-control tips:
 ```json
 {
   "keywords": ["led light"],
-  "maxResults": 10,
+  "maxResults": 1,
   "proxyConfiguration": {
     "useApifyProxy": false
   }
@@ -87,7 +88,7 @@ Cost-control tips:
 1. Click **Try for free** or **Run**.
 2. Enter one or more product keywords.
 3. Optionally add exact city, state, business type, trusted seller, or Made in India filters.
-4. Set `maxResults` small for the first run.
+4. Keep `maxResults` at 1 for the first run.
 5. Run the Actor and export the dataset as CSV, JSON, Excel, or through the Apify API.
 
 ## Sample output
@@ -134,7 +135,7 @@ import { ApifyClient } from 'apify-client';
 const client = new ApifyClient({ token: 'YOUR_API_TOKEN' });
 const run = await client.actor('tradeindia-b2b-supplier-scraper').call({
   keywords: ['led light'],
-  maxResults: 10,
+  maxResults: 1,
 });
 const { items } = await client.dataset(run.defaultDatasetId).listItems();
 console.log(`Got ${items.length} suppliers`);

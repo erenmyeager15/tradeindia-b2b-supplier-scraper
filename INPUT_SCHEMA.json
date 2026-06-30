@@ -1,6 +1,6 @@
 {
   "title": "TradeIndia B2B Supplier Scraper Input",
-  "description": "Search TradeIndia public supplier and product listings. Defaults are set for a low-cost LED light supplier test.",
+  "description": "Search TradeIndia public supplier and product listings. Defaults are set for a low-cost one-result LED light supplier test.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
@@ -53,11 +53,11 @@
     "maxResults": {
       "title": "Maximum results",
       "type": "integer",
-      "description": "Maximum number of unique supplier/product records to save. Start with 10 for a small test run.",
+      "description": "Maximum number of unique supplier/product records to save. Start with 1 for a small test run.",
       "editor": "number",
       "minimum": 1,
       "maximum": 500,
-      "default": 10
+      "default": 1
     },
     "proxyConfiguration": {
       "title": "Proxy configuration",

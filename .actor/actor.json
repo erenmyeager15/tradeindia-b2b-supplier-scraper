@@ -1,8 +1,8 @@
 {
   "actorSpecification": 1,
   "name": "tradeindia-b2b-supplier-scraper",
-  "title": "TradeIndia B2B Supplier Scraper",
-  "description": "Scrape TradeIndia supplier and product listings with company names, business type, location, price, MOQ, trust flags, website, product URL, and supplier URL. No login or API key required.",
+  "title": "TradeIndia Supplier Scraper: B2B Products & MOQ",
+  "description": "Scrape public TradeIndia supplier and product listings by keyword, including company names, business type, location, prices, MOQ, trust flags, websites, product URLs, and images.",
   "version": "1.0",
   "buildTag": "latest",
   "dockerfile": "./Dockerfile",
@@ -13,20 +13,31 @@
     "dataset": "./dataset_schema.json"
   },
   "categories": ["ECOMMERCE", "OTHER"],
+  "categoriesVersion": "1.0.0",
   "memoryMbytes": 1024,
   "timeoutSecs": 1800,
   "defaultRunOptions": {
+    "build": "latest",
     "memoryMbytes": 1024,
     "timeoutSecs": 1800
   },
+  "minMemoryMbytes": 256,
+  "maxMemoryMbytes": 2048,
   "exampleRunInput": {
     "contentType": "application/json; charset=utf-8",
-    "body": "{\n  \"keywords\": [\"led light\"],\n  \"maxResults\": 10,\n  \"proxyConfiguration\": {\n    \"useApifyProxy\": false\n  }\n}"
+    "body": "{\n  \"keywords\": [\"led light\"],\n  \"maxResults\": 1,\n  \"proxyConfiguration\": {\n    \"useApifyProxy\": false\n  }\n}"
   },
   "pricingInfo": {
     "pricingModel": "PAY_PER_EVENT",
     "pricingPerEvent": {
       "actorChargeEvents": {
+        "apify-actor-start": {
+          "eventTitle": "Actor Start",
+          "eventDescription": "Charged when the Actor starts running. Number of events charged depends on Actor memory (one event per GB, minimum one event).",
+          "eventPriceUsd": 0.00005,
+          "isPrimaryEvent": false,
+          "isOneTimeEvent": true
+        },
         "supplier-scraped": {
           "eventTitle": "Supplier scraped",
           "eventDescription": "Charged once for each clean TradeIndia supplier/product record saved to the dataset.",

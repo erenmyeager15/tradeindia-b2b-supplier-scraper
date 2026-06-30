@@ -3,7 +3,7 @@ import { fetch, ProxyAgent, type Dispatcher } from 'undici';
 import type { ActorInput, NormalizedInput, ScrapeJob, SupplierRecord } from './types.js';
 
 const CHARGE_EVENT_NAME = 'supplier-scraped';
-const DEFAULT_MAX_RESULTS = 10;
+const DEFAULT_MAX_RESULTS = 1;
 const MAX_RESULTS_CAP = 500;
 const RESULTS_PER_PAGE_ESTIMATE = 28;
 const BASE_URL = 'https://www.tradeindia.com';
@@ -115,8 +115,12 @@ export async function scrapeTradeIndia(rawInput: ActorInput): Promise<void> {
     log.info('TradeIndia scrape finished', { pushed });
 }
 
-function normalizeInput(input: ActorInput): NormalizedInput {
-    const keywords = (input.keywords?.length ? input.keywords : ['led light'])
+export function normalizeInput(input: ActorInput): NormalizedInput {
+    const rawKeywords = Array.isArray(input.keywords) ? input.keywords : [];
+    const rawBusinessTypes = Array.isArray(input.businessTypes) ? input.businessTypes : [];
+    const requestedMaxResults = Number(input.maxResults ?? DEFAULT_MAX_RESULTS);
+    const safeMaxResults = Number.isFinite(requestedMaxResults) ? requestedMaxResults : DEFAULT_MAX_RESULTS;
+    const keywords = (rawKeywords.length ? rawKeywords : ['led light'])
         .map((keyword) => cleanText(keyword))
         .filter(Boolean)
         .slice(0, 25);
@@ -125,15 +129,15 @@ function normalizeInput(input: ActorInput): NormalizedInput {
         keywords: keywords.length ? keywords : ['led light'],
         city: cleanText(input.city) || null,
         state: cleanText(input.state) || null,
-        businessTypes: (input.businessTypes ?? []).map((type) => cleanText(type).toLowerCase()).filter(Boolean),
+        businessTypes: rawBusinessTypes.map((type) => cleanText(type).toLowerCase()).filter(Boolean),
         trustedOnly: Boolean(input.trustedOnly),
         madeInIndiaOnly: Boolean(input.madeInIndiaOnly),
-        maxResults: Math.min(Math.max(Math.floor(input.maxResults ?? DEFAULT_MAX_RESULTS), 1), MAX_RESULTS_CAP),
+        maxResults: Math.min(Math.max(Math.floor(safeMaxResults), 1), MAX_RESULTS_CAP),
         proxyConfiguration: input.proxyConfiguration ?? { useApifyProxy: false },
     };
 }
 
-function buildJobs(input: NormalizedInput): ScrapeJob[] {
+export function buildJobs(input: NormalizedInput): ScrapeJob[] {
     const maxPages = Math.min(Math.ceil(input.maxResults / Math.max(input.keywords.length * RESULTS_PER_PAGE_ESTIMATE, 1)) + 8, 25);
     const jobs: ScrapeJob[] = [];
 
@@ -150,7 +154,7 @@ function buildJobs(input: NormalizedInput): ScrapeJob[] {
     return jobs;
 }
 
-function buildSearchUrl(keyword: string, page: number): string {
+export function buildSearchUrl(keyword: string, page: number): string {
     const url = new URL('/search.html', BASE_URL);
     url.searchParams.set('keyword', keyword);
     if (page > 1) url.searchParams.set('page', String(page));
@@ -194,7 +198,7 @@ function looksBlocked(html: string): boolean {
         || lower.includes('cloudflare');
 }
 
-function extractListings(html: string): AnyObject[] {
+export function extractListings(html: string): AnyObject[] {
     const nextData = extractNextData(html);
     const serverData = asObject(asObject(asObject(nextData.props).pageProps).serverData);
     const searchListingData = asObject(serverData.searchListingData);
@@ -219,7 +223,7 @@ function extractNextData(html: string): AnyObject {
     }
 }
 
-function normalizeListing(item: AnyObject, searchQuery: string): SupplierRecord | null {
+export function normalizeListing(item: AnyObject, searchQuery: string): SupplierRecord | null {
     const productId = cleanText(item.product_id ?? item.id);
     const supplierName = titleCaseIfNeeded(cleanText(item.co_name ?? item.initial_co_name));
     const productName = cleanText(item.product_name ?? item.product_description);
@@ -269,7 +273,7 @@ function normalizeListing(item: AnyObject, searchQuery: string): SupplierRecord 
     };
 }
 
-function passesFilters(record: SupplierRecord, input: NormalizedInput): boolean {
+export function passesFilters(record: SupplierRecord, input: NormalizedInput): boolean {
     if (input.city && !sameText(record.city, input.city)) return false;
     if (input.state && !sameText(record.state, input.state)) return false;
     if (input.trustedOnly && record.trustedSeller !== true) return false;
@@ -346,7 +350,7 @@ function parsePrice(value: string | null): number | null {
 
 function extractCurrency(value: string | null): string | null {
     if (!value) return null;
-    if (/\bINR\b|₹/i.test(value)) return 'INR';
+    if (/\bINR\b|\bRs\.?\b|\u20b9/i.test(value)) return 'INR';
     if (/\bUSD\b|\$/i.test(value)) return 'USD';
     return null;
 }

@@ -1,9 +1,7 @@
 {
-  "keywords": ["packaging machine"],
-  "maxResults": 5,
+  "keywords": ["led light"],
+  "maxResults": 1,
   "proxyConfiguration": {
-    "useApifyProxy": true,
-    "apifyProxyGroups": ["RESIDENTIAL"],
-    "apifyProxyCountry": "IN"
+    "useApifyProxy": false
   }
 }
